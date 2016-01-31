@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>error404</title>
+
+
+    </head>
+
+    <body>
+
+            <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+            <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/bootstrap.min.js"></script>
+
+
+        <div id="header">
+            <div id="title">
+                <a href="../">
+                    <img src="{% static 'img/logo_prodbox.png' %}" alt="Titre"/>
+                </a>
+            </div>
+
+            <a href=""  class="topmenubox">
+                    <!-- <img src="{% static 'img/bouton_1.png' %}" alt="ProdBox" id="explore_img"/> -->
+                <h2 style="font-weight: normal;" id="about_text">About us</h2>
+            </a>
+
+                <!--double @@ for emails-->
+            <a href="mailto:pestowebmining13@@gmail.com"  class="topmenubox">
+                    <!-- <img src="{% static 'img/bouton_1.png' %}" alt="ProdBox" id="explore_img"/> -->
+                <h2 style="font-weight: normal;" id="mail_text">Contact</h2>
+            </a>
+
+            <div class="topmenubox">
+                    <!-- <img src="{% static 'img/bouton_1.png' %}" alt="ProdBox" id="explore_img"/> -->
+                <h2 style="font-weight: normal;" id="vertbar">&#124</h2>
+            </div>
+
+            <a href="../prediction/"  class="topmenubox">
+                    <!-- <img src="{% static 'img/bouton_2.png' %}" alt="ProdBox" id="predict_img"/> -->
+                <h2 id="predict_text">Predict</h2>
+            </a>
+
+            <a href="../explore/"  class="topmenubox">
+                    <!-- <img src="{% static 'img/bouton_1.png' %}" alt="ProdBox" id="explore_img"/> -->
+                <h2 id="explore_text">Explore</h2>
+            </a>
+
+
+
+
+        </div>
+
+
+
+
+
+
+    </body>
+@import controllers.routes._

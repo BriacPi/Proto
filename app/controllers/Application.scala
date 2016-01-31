@@ -11,5 +11,10 @@ object Application extends Controller {
   def demo = Action {
     Ok(views.html.demo())
   }
+  def error404 = Action {
+    Ok(views.html.error404())
+  }
+
 
 }
+
