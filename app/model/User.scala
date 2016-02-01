@@ -13,6 +13,8 @@ import com.mongodb.DBCursor
 import com.mongodb.ServerAddress;
 import mongo.MongoDBProxy
 
+import play.api.libs.json.Json
+import org.bson.Document
 /**
   * Created by corpus on 31/01/2016.
   */
@@ -29,3 +31,13 @@ case class User(
                  dateRegisteration: DateTime
 
                )
+object User {
+  def getAll():Document = {
+    MongoDBProxy.getCollection("users").find().first()
+  }
+  def getString():String = {
+
+    //JSON String, ce n'est PAS un objet JSON.
+  MongoDBProxy.getCollection("users").find().first().toJson()
+  }
+}

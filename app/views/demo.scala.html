@@ -1,10 +1,17 @@
+@import model.User
+
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>demo</title>
-</head>
-<body>
-Coucou Su
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>demo</title>
+    </head>
+    <body>
+        Coucou Su
+        &nbsp
+        <br>
+        <br/>
+        @User.getAll().get("name")
+    </body>
 </html>
