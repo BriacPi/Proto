@@ -1,12 +1,19 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
+GET     /assets/*file                                                                controllers.Assets.versioned(path="/public", file)
 
-# Home page
-GET     /                           controllers.Application.index
+# Authentication
+GET /authentication                                                                  controllers.AuthenticationController.welcome()
+GET /logout                                                                          controllers.AuthenticationController.logout()
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+# User Management
+GET /useredition                                                                     controllers.UserController.editUser()
 
-GET     /demo               controllers.Application.demo()
-GET     /error404            controllers.Application.error404()
+GET /passwordedition                                                                 controllers.UserController.editPassword()
+POST /login                                                                          controllers.AuthenticationController.login()
+POST /edituser                                                                       controllers.UserController.saveEditionUser()
+POST /editpassword                                                                   controllers.UserController.saveEditionPassword()
+
+
+GET /myprofile/:id                                                                   controllers.UserController.myProfile(id :Long)
