@@ -18,6 +18,15 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.27"
 
+// you may also want to add the typesafe repository
+resolvers += "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/"
+
+//resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+libraryDependencies ++= Seq(
+  "org.reactivemongo" %% "reactivemongo" % "0.11.9"
+)
+
 // Core dependencies
 libraryDependencies ++= Seq(
   filters
