@@ -24,7 +24,8 @@ resolvers += "Typesafe repository releases" at "http://repo.typesafe.com/typesaf
 //resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo" % "0.11.9"
+  "org.reactivemongo" %% "reactivemongo" % "0.11.9",
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.9"
 )
 
 // Core dependencies
