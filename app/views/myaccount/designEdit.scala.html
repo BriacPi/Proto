@@ -8,7 +8,7 @@
 @import play.api.i18n.Messages.Implicits._
 
 
-@main(Messages("home.header"))("t")(currentUser) {
+@main(Messages("home.header"))("t")(Some(currentUser)) {
 @helper.form(action = routes.UserController.saveEditionUser(), args = 'class -> "userForm"){
 <div class="card"><!-- Face 2 -->
 

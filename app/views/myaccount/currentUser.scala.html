@@ -8,7 +8,7 @@
 
 
 
-@main(Messages("home.header"))("t")(currentUser) {
+@main(Messages("home.header"))("t")(Some(currentUser)) {
 <div class="page-header" style="margin-left:1em;">
     <h1>@Messages("user.profile")</h1>
 </div>

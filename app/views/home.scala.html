@@ -1,5 +1,5 @@
 @import models.authentication.User
-@(currentUser :User)(implicit lang:Lang)
+@(currentUser :Option[User])(implicit lang:Lang)
 
 @import helper._
 @import play.api.Play.current
