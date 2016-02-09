@@ -9,7 +9,7 @@
 
 
 
-@main(Messages("home.header"))("t")(currentUser) {
+@main(Messages("home.header"))("t")(Some(currentUser)) {
 
 @helper.form(action = routes.UserController.saveEditionUser(), args = 'class -> "userForm"){
 

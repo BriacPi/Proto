@@ -3,6 +3,9 @@
 # ~~~~
 GET     /assets/*file                                                                controllers.Assets.versioned(path="/public", file)
 
+#Main
+GET /                                                                               controllers.Application.welcome()
+
 # Authentication
 GET /authentication                                                                  controllers.AuthenticationController.welcome()
 GET /logout                                                                          controllers.AuthenticationController.logout()

@@ -49,7 +49,7 @@ class AuthenticationController @Inject()(cache: CacheApi) extends Controller {
         UserRepository.getByEmail(email) match {
           case Some(user) =>
             if (PasswordAuthentication.authenticate(password, user.password)) {
-              SessionManager.create(Ok(views.html.home(user)), user)
+              SessionManager.create(Ok(views.html.home(Some(user))), user)
             }
             else Unauthorized(views.html.authentication.authentication(filledForm.withGlobalError("error.invalidPassword")))
 

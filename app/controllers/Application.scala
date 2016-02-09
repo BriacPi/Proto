@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import akka.actor._
-import components.mvc.AuthController
+import components.mvc.{RegularController, AuthController}
 import models.authentication.User
 
 
@@ -21,12 +21,15 @@ import repositories._
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class Application @Inject()(ws: WSClient)(system: ActorSystem)(val messagesApi: MessagesApi) extends AuthController with I18nSupport {
+class Application @Inject()(ws: WSClient)(system: ActorSystem)(val messagesApi: MessagesApi) extends RegularController with I18nSupport {
 
 
   //Userform
   val userForm: Form[String] = Form("new value" -> of[String])
 
+  def welcome() = RegularAction(){ implicit request =>
+    Ok(views.html.home(request.user))
+  }
 
 
 }

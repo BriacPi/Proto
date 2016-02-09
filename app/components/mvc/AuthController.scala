@@ -1,6 +1,3 @@
-/**
- * Copyright (C) 2015 Captain Dash - All Rights Reserved
- */
 
 package components.mvc
 
