@@ -1,0 +1,7 @@
+authentication.header=Authentication
+authentication.title= Authentication
+authentication.email= E-mail address
+authentication.password = Password
+authentication.login = Authenticate
+
+home.sign= Sign Up / Sign In
