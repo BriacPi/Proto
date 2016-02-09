@@ -18,7 +18,7 @@ trait SessionManager {
   val SESSION_KEY = "user"
 
   def create(result: Result, user: User): Result = {
-    result.withSession(SESSION_KEY -> Crypto.encryptAES(user.id.toString))
+    result.withSession(SESSION_KEY -> Crypto.encryptAES(user.email))
   }
 
   def destroy(result: Result): Result = {
@@ -27,14 +27,15 @@ trait SessionManager {
 
   def fetch(request: RequestHeader): Option[User] = {
     // TODO Use Hystrix
-    get(request).flatMap(UserRepository.findById)
+
+    get(request).flatMap(UserRepository.findByEmail)
   }
 
-  private[this] def get(request: RequestHeader): Option[Long] = {
+  private[this] def get(request: RequestHeader): Option[String] = {
     Try(
       request.session.get(SESSION_KEY)
         .map(Crypto.decryptAES)
-        .map(_.toLong)
+
     )
     .toOption
     .flatten

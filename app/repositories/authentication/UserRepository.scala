@@ -1,10 +1,11 @@
 package repositories.authentication
 
-import models.authentication.{TemporaryUser, Article, User}
+import models.authentication.{EditUser, TemporaryUser, Article, User}
 import mongo.MongoDBProxy
 import org.joda.time.DateTime
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 //
 //case class User(
@@ -31,13 +32,13 @@ trait UserRepository {
 object UserRepository extends UserRepository {
   val collection: BSONCollection = MongoDBProxy.db.collection("users")
 
-  implicit object userReader extends BSONDocumentReader[UserRepository] {
+  implicit object userReader extends BSONDocumentReader[User] {
     def read(doc: BSONDocument): User = {
       User(doc.getAs[String]("email").get,
         doc.getAs[String]("firstName").get,
         doc.getAs[String]("lastName").get,
-        doc.getAs[BSONDateTime]("dateRegistration").map(dt => new DateTime(dt.value)).get,
-        doc.getAs[String]("password").get
+        doc.getAs[String]("password").get,
+        doc.getAs[BSONDateTime]("dateRegistration").map(dt => new DateTime(dt.value)).get
       )
     }
   }
@@ -48,7 +49,13 @@ object UserRepository extends UserRepository {
       doc.++("email" -> user.email)
       doc.++("firstName" -> user.firstName)
       doc.++("lastName" -> user.lastName)
-      doc.++("dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis))
+      doc.++("password" -> user.password)
+    }
+    def write(user: EditUser): BSONDocument = {
+      def doc: BSONDocument = BSONDocument()
+      doc.++("email" -> user.email)
+      doc.++("firstName" -> user.firstName)
+      doc.++("lastName" -> user.lastName)
       doc.++("password" -> user.password)
     }
     def write(user: User): BSONDocument = {
@@ -95,7 +102,7 @@ object UserRepository extends UserRepository {
 
   }
 
-  def editUser(user: User): Unit = {
+  def editUser(user: EditUser): Unit = {
 
     val selector = BSONDocument("email" -> user.email)
     val modifier = BSONDocument("$set" -> userWriter.write(user))
@@ -122,9 +129,13 @@ object UserRepository extends UserRepository {
   }
 
   def findByEmail (email: String): Option[User] = {
-    val query = = BSONDocument("email" -> email)
+    val query = BSONDocument("email" -> email)
     val listUser = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
-  if (listUser.isEmpty) return None
-  else return Some(userReader.read(listUser.head))
+    listUser match {
+      case  x::r => Some(userReader.read(x))
+      case _ => None
+    }
   }
+
+
 }

@@ -19,4 +19,4 @@ POST /edituser                                                                  
 POST /editpassword                                                                   controllers.UserController.saveEditionPassword()
 
 
-GET /myprofile/:id                                                                   controllers.UserController.myProfile(id :Long)
+GET /myprofile                                                                    controllers.UserController.myProfile()

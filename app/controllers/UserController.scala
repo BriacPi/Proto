@@ -7,7 +7,7 @@ import components.mvc.AuthController
 import components.user.{PasswordAuthentication, SessionManager}
 
 
-import models.authentication.{LoginValues, TemporaryUser,EditUser,User,EditPassword}
+import models.authentication._
 
 
 import play.api.data.Form
@@ -24,18 +24,15 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
       "email" -> nonEmptyText,
       "firstName"->nonEmptyText,
       "lastName"->nonEmptyText,
-      "password" -> nonEmptyText,
-      "company" -> nonEmptyText
+      "password" -> nonEmptyText
     )(TemporaryUser.apply)(TemporaryUser.unapply)
   )
-
   val editUserForm : Form[EditUser]= Form(
     mapping(
+      "email"->nonEmptyText,
       "firstName"->nonEmptyText,
       "lastName"->nonEmptyText,
-      "oldPassword" -> nonEmptyText,
-
-      "company" -> nonEmptyText
+      "oldPassword" -> nonEmptyText
     )(EditUser.apply)(EditUser.unapply)
   )
   val editPasswordForm : Form[EditPassword]= Form(
@@ -53,20 +50,13 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
   )
 
   //Need to be authenticated
-  def myProfile(id: Long) = AuthenticatedAction() { implicit request =>
-    val user = repositories.authentication.UserRepository.findById(id)
-
-    user match {
-      case Some(u) => {
-        //val tasks = models.SuspectRow.findByAdmin(u.email).length
-        Ok(views.html.myaccount.designProfile(u))
-      }
-      case None => SessionManager.destroy(Ok(views.html.authentication.authentication(form)))
-    }
+  def myProfile() = AuthenticatedAction() { implicit request =>
+    val user=request.user
+        Ok(views.html.myaccount.designProfile(user))
   }
 
   def editUser() = AuthenticatedAction(){ implicit request =>
-    val user =models.authentication.EditUser(request.user.firstName,request.user.lastName,request.user.password,request.user.company)
+    val user =models.authentication.EditUser(request.user.email,request.user.firstName,request.user.lastName,request.user.password)
     Ok(views.html.myaccount.designEdit(editUserForm.fill(user.copy(password="")),request.user))
   }
   def editPassword() = AuthenticatedAction(){ implicit request =>
@@ -74,7 +64,7 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
   }
 
   def saveEditionUser() = AuthenticatedAction(){ implicit request =>
-    val cuser =models.authentication.EditUser(request.user.firstName,request.user.lastName,request.user.password,request.user.company)
+    val cuser =models.authentication.EditUser(request.user.email,request.user.firstName,request.user.lastName,request.user.password)
 
     editUserForm.bindFromRequest.fold(
       error => {
@@ -92,10 +82,11 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
           case Some(user) =>
 
             if (PasswordAuthentication.authenticate( success.password,user.password)) {
-              val newUser = User(user.id,user.email,success.firstName,success.lastName,PasswordAuthentication.passwordHash(success.password),success.company)
+              val newUser = EditUser(user.email,success.firstName,success.lastName,PasswordAuthentication.passwordHash(success.password))
 
               repositories.authentication.UserRepository.editUser(newUser)
-              Ok(views.html.myaccount.designProfile(newUser))
+              val upDatedUser = UserRepository.findByEmail(newUser.email)
+              Ok(views.html.myaccount.designProfile(upDatedUser.get))
 
             }
             else {
@@ -126,7 +117,7 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
         UserRepository.findByEmail(request.user.email) match {
           case Some(user) =>
             if (PasswordAuthentication.authenticate( success.oldPassword,user.password)) {
-              val newUser = User(user.id,user.email,user.firstName,user.lastName,PasswordAuthentication.passwordHash(success.newPassword),user.company)
+              val newUser = User(user.email,user.firstName,user.lastName,PasswordAuthentication.passwordHash(success.newPassword),user.dateRegistration)
 
               repositories.authentication.UserRepository.editPassword(newUser)
               Ok(views.html.myaccount.designProfile(newUser))

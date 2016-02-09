@@ -5,6 +5,7 @@ import mongo.MongoDBProxy
 import org.joda.time.DateTime
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by corpus on 05/02/2016.
@@ -33,7 +34,7 @@ object ArticleRepository extends ArticleRepository {
       val nbLikes = doc.getAs[Int]("nbLikes").get
       val nbComments = doc.getAs[Int]("nbComments").get
 
-
+      Article(title, content,creationDate,lastUpdate,nbLikes,nbComments)
       //how to not to build them
 
     }

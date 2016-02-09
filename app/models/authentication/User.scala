@@ -10,8 +10,8 @@ case class User(
                  email: String,
                  firstName: String,
                  lastName: String,
-                 dateRegistration: DateTime,
-                 password: String
+                 password: String,
+                 dateRegistration: DateTime
 
                )
 
@@ -19,21 +19,19 @@ case class TemporaryUser(
                  email: String,
                  firstName: String,
                  lastName: String,
-                 dateRegistration: DateTime,
                  password: String
-
                )
 
-case class EditUser(
-                 firstName: String,
-                 lastName: String,
-                 dateRegistration: DateTime,
-                 password: String
-
-               )
 
 case class EditPassword(
                  oldPassword: String,
                  newPassword: String
+
+               )
+case class EditUser(
+                 email: String,
+                 firstName: String,
+                 lastName: String,
+                 password: String
 
                )
