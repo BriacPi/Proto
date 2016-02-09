@@ -1,121 +1,130 @@
 package repositories.authentication
 
-import anorm.SqlParser._
-import anorm._
-import models.authentication.User
-import play.api.Play.current
-import play.api.db.DB
-import models.authentication.{TemporaryUser,EditUser}
+import models.authentication.{TemporaryUser, Article, User}
+import mongo.MongoDBProxy
+import org.joda.time.DateTime
+import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.bson._
 
+//
+//case class User(
+//                 email: String,
+//                 firstName: String,
+//                 lastName: String,
+//                 dateBirth: DateTime,
+//                 age: Long,
+//                 nbArticles: Int,
+//                 nbComments: Int,
+//                 nbLikesGiven: Int,
+//                 dateRegistration: DateTime,
+//                 password: String
+//
+//               )
 
-import scala.language.postfixOps
-
+/**
+  * Created by corpus on 05/02/2016.
+  */
 trait UserRepository {
-
-  private[repositories] val recordMapper = {
-    long("users.id") ~
-      str("users.email") ~
-      get[Option[String]]("users.first_name") ~
-      get[Option[String]]("users.last_name") ~
-      str("users.encrypted_password") ~
-      str("users.company") map {
-      case id ~ email ~ firstName ~ lastName ~ password ~ company => {
-        User(id, email, firstName.getOrElse(""), lastName.getOrElse(""), password, company)
-      }
-    }
-  }
-
-  def create(user: TemporaryUser): Unit = {
-    DB.withConnection { implicit c =>
-      SQL("insert into users (email,first_name,last_name,encrypted_password,company) values " +
-        "({email},{first_name},{last_name},{encrypted_password},{company})").on(
-          'email -> user.email,
-          'first_name -> user.firstName,
-          'last_name -> user.lastName,
-          'encrypted_password -> user.password,
-          'company -> user.company
-        ).executeInsert()
-    }
-  }
-
-  def editUser(user: User): Unit = {
-    DB.withConnection { implicit c =>
-      SQL("update  users set first_name ={first_name},last_name={last_name},encrypted_password={encrypted_password},"+
-      "company={company} where email ={email}").on(
-          'email -> user.email,
-          'first_name -> user.firstName,
-          'last_name -> user.lastName,
-          'encrypted_password -> user.password,
-          'company -> user.company
-        ).executeUpdate()
-    }
-  }
-
-  def editPassword(user: User): Unit = {
-    DB.withConnection { implicit c =>
-      SQL("update  users set encrypted_password={encrypted_password}where email ={email}").on(
-          'email -> user.email,
-          'encrypted_password -> user.password
-        ).executeUpdate()
-    }
-  }
-
-
-  def delete(email:String): Unit = {
-    DB.withConnection { implicit c =>
-      SQL("delete from users  where email = " +
-        "{email}").on(
-          'email -> email
-        ).executeUpdate()
-    }
-  }
-
-  def list(): Seq[User] = {
-    DB.withConnection { implicit current =>
-      SQL(
-        """
-          SELECT * FROM users
-          ORDER BY id
-        """
-      )
-        .on("enabled" -> true)
-        .as(recordMapper *)
-        .toList
-    }
-  }
-
-  def getAllEmails: List[String]={
-    list().map(_.email).toList.sorted
-  }
-
-  def findByEmail(email: String): Option[User] = {
-    DB.withConnection { implicit current =>
-      SQL(
-        """
-          SELECT users.*
-          FROM users
-          WHERE users.email = {email}
-        """
-      )
-        .on("email" -> email)
-        .as(recordMapper.singleOpt)
-    }
-  }
-
-  def findById(id: Long): Option[User] = {
-    DB.withConnection { implicit current =>
-      SQL(
-        """
-          SELECT users.*
-          FROM users
-          WHERE users.id = {id}
-        """
-      )
-        .on("id" -> id)
-        .as(recordMapper.singleOpt)
-    }
-  }
 
 }
 
-object UserRepository extends UserRepository
+object UserRepository extends UserRepository {
+  val collection: BSONCollection = MongoDBProxy.db.collection("users")
+
+  implicit object userReader extends BSONDocumentReader[UserRepository] {
+    def read(doc: BSONDocument): User = {
+      User(doc.getAs[String]("email").get,
+        doc.getAs[String]("firstName").get,
+        doc.getAs[String]("lastName").get,
+        doc.getAs[BSONDateTime]("dateRegistration").map(dt => new DateTime(dt.value)).get,
+        doc.getAs[String]("password").get
+      )
+    }
+  }
+
+  implicit object userWriter extends BSONDocumentWriter[TemporaryUser] {
+    def write(user: TemporaryUser): BSONDocument = {
+      def doc: BSONDocument = BSONDocument()
+      doc.++("email" -> user.email)
+      doc.++("firstName" -> user.firstName)
+      doc.++("lastName" -> user.lastName)
+      doc.++("dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis))
+      doc.++("password" -> user.password)
+    }
+    def write(user: User): BSONDocument = {
+      def doc: BSONDocument = BSONDocument()
+      doc.++("email" -> user.email)
+      doc.++("firstName" -> user.firstName)
+      doc.++("lastName" -> user.lastName)
+      doc.++("dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis))
+      doc.++("password" -> user.password)
+    }
+  }
+
+  def getByName(name: String): Option[List[User]] = {
+    //IntelliJi doesn't solve BSONCollection type, has to state it
+
+    val query = BSONDocument("$or" -> BSONDocument("firstName" -> name, "lastName" -> name))
+
+    //value gives option of try from future list, 2 gets fot option and try then head
+    val listBSON = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
+    //collect returns a future type that needs to be unwrapped
+    if (listBSON.isEmpty) return None
+    else Some((listBSON.map(doc => UserRepository.userReader.read(doc))))
+  }
+
+  def getByEmail(email: String): Option[User] = {
+    val query = BSONDocument("email" -> email)
+    //value gives option of try from future list, 2 gets fot option and try then head
+    val listBSON = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
+    //collect returns a future type that needs to be unwrapped
+    if (listBSON.isEmpty) return None
+    else Some(UserRepository.userReader.read(listBSON.head))
+  }
+
+  def create(user: TemporaryUser): Unit = {
+//    val email = user.email
+//    val firstName = user.firstName
+//    val lastName = user.lastName
+//
+//    if (!getByEmail(email).isEmpty) {
+//      "Error: this email has already been used."
+//    }
+    val doc = userWriter.write(user)
+    collection.insert(doc)
+
+  }
+
+  def editUser(user: User): Unit = {
+
+    val selector = BSONDocument("email" -> user.email)
+    val modifier = BSONDocument("$set" -> userWriter.write(user))
+    collection.update(selector, modifier)
+  }
+
+  def editPassword(user: User): Unit = {
+
+    val selector = BSONDocument("email" -> user.email)
+    val modifier = BSONDocument("$set" -> BSONDocument("password" -> user.password))
+    collection.update(selector, modifier)
+  }
+
+  def delet(email: String): Unit = {
+    val selector = BSONDocument("email" -> email)
+
+    collection.remove(selector)
+
+//    futureRemove.onComplete {
+//      case Failure(e) => throw e
+//      case Success(lasterror) => {
+//        println("successfully removed document")
+//      }
+  }
+
+  def findByEmail (email: String): Option[User] = {
+    val query = = BSONDocument("email" -> email)
+    val listUser = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
+  if (listUser.isEmpty) return None
+  else return Some(userReader.read(listUser.head))
+  }
+}

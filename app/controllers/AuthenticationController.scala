@@ -46,7 +46,7 @@ class AuthenticationController @Inject()(cache: CacheApi) extends Controller {
         val password = success.password
         val filledForm = form.fill(LoginValues(email, password))
 
-        UserRepository.findByEmail(email) match {
+        UserRepository.getByEmail(email) match {
           case Some(user) =>
             if (PasswordAuthentication.authenticate(password, user.password)) {
               SessionManager.create(Ok(views.html.home(user)), user)

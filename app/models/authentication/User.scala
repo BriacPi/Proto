@@ -1,36 +1,39 @@
-/**
- * Copyright (C) 2015 Captain Dash - All Rights Reserved
- */
-
 package models.authentication
 
-import play.api.libs.json._
-import anorm.SqlParser._
-import anorm._
+import org.joda.time.DateTime
 
-import scala.language.postfixOps
+/**
+  * Created by corpus on 31/01/2016.
+  */
 
-case class User(id: Long, email: String, firstName: String, lastName: String, password: String, company:String)
-case class TemporaryUser(email: String, firstName: String, lastName: String, password: String, company:String)
-case class EditUser(firstName: String, lastName: String, password: String,company:String)
-case class EditPassword(oldPassword :String, newPassword : String)
+case class User(
+                 email: String,
+                 firstName: String,
+                 lastName: String,
+                 dateRegistration: DateTime,
+                 password: String
 
+               )
 
-object User {
-  
-  /**
-   * JSON writer serializer
-   */
-  implicit val writer = new Writes[User] {
-    def writes(user: User) = Json.obj(
-      "id" -> user.id,
-      "email" -> user.email,
-      "last_name" -> user.lastName,
-      "first_name" -> user.firstName,
-      "company" -> user.company
-    )
-  }
+case class TemporaryUser(
+                 email: String,
+                 firstName: String,
+                 lastName: String,
+                 dateRegistration: DateTime,
+                 password: String
 
+               )
 
-}
+case class EditUser(
+                 firstName: String,
+                 lastName: String,
+                 dateRegistration: DateTime,
+                 password: String
 
+               )
+
+case class EditPassword(
+                 oldPassword: String,
+                 newPassword: String
+
+               )

@@ -1,11 +1,10 @@
 @import models.authentication.LoginValues
 @(loginForm:Form[LoginValues])(implicit lang:Lang)
 
-@import helper._
+@@import models.authentication.Article
+  import helper._
 @import play.api.Play.current
 @import play.api.i18n.Messages.Implicits._
-
-@import model.Article
 
 <!DOCTYPE html>
 

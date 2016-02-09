@@ -1,4 +1,4 @@
-package model
+package models.authentication
 
 /**
   * Created by corpus on 02/02/2016.

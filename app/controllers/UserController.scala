@@ -52,6 +52,7 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
     )(LoginValues.apply)(LoginValues.unapply)
   )
 
+  //Need to be authenticated
   def myProfile(id: Long) = AuthenticatedAction() { implicit request =>
     val user = repositories.authentication.UserRepository.findById(id)
 
@@ -87,7 +88,7 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
 
         val filledForm = editUserForm.fill(success.copy(password=""))
 
-        UserRepository.findByEmail(request.user.email) match {
+        UserRepository.getByEmail(request.user.email) match {
           case Some(user) =>
 
             if (PasswordAuthentication.authenticate( success.password,user.password)) {
