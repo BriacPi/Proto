@@ -10,6 +10,7 @@ import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+
 /**
   * Created by corpus on 05/02/2016.
   */
@@ -127,6 +128,7 @@ object UserRepository extends UserRepository {
     //collect returns a future type that needs to be unwrapped
     if (listBSON.isEmpty) return None
     else Some((listBSON.map(doc => UserRepository.userReader.read(doc))))
+
   }
 
 

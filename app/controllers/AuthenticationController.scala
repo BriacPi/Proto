@@ -13,6 +13,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
 import repositories.authentication.UserRepository
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Controller used to manage user session.
@@ -33,11 +35,11 @@ class AuthenticationController @Inject()(cache: CacheApi) extends Controller {
      Ok(views.html.authentication.authentication(form))
   }
 
-  def login: Action[AnyContent] = Action { implicit request =>
+  def login: Action[AnyContent] = Action.async { implicit request =>
     form.bindFromRequest.fold(
       error => {
         // Request payload is invalid.envisageable
-        BadRequest(views.html.authentication.authentication(form.withGlobalError("error.invalidUserOrPassword")))
+        Future.successful(BadRequest(views.html.authentication.authentication(form.withGlobalError("error.invalidUserOrPassword"))))
       },
       success => {
 
@@ -46,7 +48,7 @@ class AuthenticationController @Inject()(cache: CacheApi) extends Controller {
         val password = success.password
         val filledForm = form.fill(LoginValues(email, password))
 
-        UserRepository.getByEmail(email) match {
+        UserRepository.findByEmail(email).map{
           case Some(user) =>
             if (PasswordAuthentication.authenticate(password, user.password)) {
               SessionManager.create(Ok(views.html.home(Some(user))), user)
