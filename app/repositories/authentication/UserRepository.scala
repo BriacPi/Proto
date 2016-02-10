@@ -36,10 +36,12 @@ object UserRepository extends UserRepository {
   implicit object userWriter extends BSONDocumentWriter[TemporaryUser] {
     def write(user: TemporaryUser): BSONDocument = {
       def doc: BSONDocument = BSONDocument()
-      doc.++("email" -> user.email)
-      doc.++("firstName" -> user.firstName)
-      doc.++("lastName" -> user.lastName)
-      doc.++("password" -> user.password)
+      BSONDocument(
+        "email" -> user.email,
+        "firstName" -> user.firstName,
+        "lastName" -> user.lastName,
+        "password" -> user.password
+      )
     }
 
     def write(user: EditUser): BSONDocument = {
@@ -51,20 +53,32 @@ object UserRepository extends UserRepository {
     }
 
     def write(user: User): BSONDocument = {
-      def doc: BSONDocument = BSONDocument()
-      doc.++("email" -> user.email)
-      doc.++("firstName" -> user.firstName)
-      doc.++("lastName" -> user.lastName)
-      doc.++("dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis))
-      doc.++("password" -> user.password)
+//      def doc: BSONDocument = BSONDocument()
+      //      println(user)
+      //      doc.++("email" -> user.email)
+      //      doc.++("firstName" -> user.firstName)
+      //      doc.++("lastName" -> user.lastName)
+      //      doc.++("dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis))
+      //      doc.++("password" -> user.password)
+
+      BSONDocument(
+        "email" -> user.email,
+        "firstName" -> user.firstName,
+        "lastName" -> user.lastName,
+        "password" -> user.password,
+        "dateRegistration" -> BSONDateTime(user.dateRegistration.getMillis)
+      )
+
     }
   }
 
 
-
   def create(user: TemporaryUser): Unit = {
-    val doc = userWriter.write(user)
-    val future: Future[WriteResult] = collectionUser.insert(doc)
+    val tempUserDoc: BSONDocument = userWriter.write(user)
+
+    // add or ++ methods create a new copy, deos not append.
+    val newUserDoc = tempUserDoc.add("dateRegistration" ->  BSONDateTime(DateTime.now().getMillis))
+    val future: Future[WriteResult] = collectionUser.insert(newUserDoc)
     future.onComplete {
       case Failure(e) => throw e
       case Success(writeResult) =>
@@ -119,6 +133,7 @@ object UserRepository extends UserRepository {
     }
     return futureUser
   }
+
   def getByName(name: String): Option[List[User]] = {
     //IntelliJi doesn't solve BSONCollection type, has to state it
 
