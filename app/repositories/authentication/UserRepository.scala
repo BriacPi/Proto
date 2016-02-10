@@ -1,5 +1,6 @@
 package repositories.authentication
 
+
 import scala.util.{Failure, Success}
 import models.authentication.{EditUser, TemporaryUser, Article, User}
 import mongo.MongoDBProxy
@@ -24,10 +25,10 @@ object UserRepository extends UserRepository {
   implicit object userReader extends BSONDocumentReader[User] {
     def read(doc: BSONDocument): User = {
       User(doc.getAs[String]("email").get,
-        doc.getAs[String]("firstName").get,
-        doc.getAs[String]("lastName").get,
+        doc.getAs[String]("firstName").getOrElse("error.noFirstName"),
+        doc.getAs[String]("lastName").getOrElse("error.noLastName"),
         doc.getAs[String]("password").get,
-        doc.getAs[BSONDateTime]("dateRegistration").map(dt => new DateTime(dt.value)).get
+        doc.getAs[BSONDateTime]("dateRegistration").map(dt => new DateTime(dt.value)).getOrElse(DateTime.now())
       )
     }
   }

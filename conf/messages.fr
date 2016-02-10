@@ -5,3 +5,7 @@ authentication.password = Mot de passe
 authentication.login = Connexion
 
 home.sign= Se Connecter
+
+error.noEmail = Aucun mail n'a été trouvé pour cet utilisateur.
+error.noFirstName = Le prénom de l'utilisateur est introuvable.
+error.noLastName  = Le nom de l'utilisateur est introuvable.

@@ -5,3 +5,7 @@ authentication.password = Password
 authentication.login = Authenticate
 
 home.sign= Sign Up / Sign In
+
+error.noEmail= No email found for this user.
+error.noFirstName = Couldn't find user's first name.
+error.noLastName  = Couldn't find user's last name.

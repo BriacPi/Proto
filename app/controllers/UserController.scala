@@ -12,6 +12,7 @@ import models.authentication._
 
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.i18n.{MessagesApi, I18nSupport}
 
 import play.api.libs.ws.WSClient
 import play.api.mvc._
@@ -21,7 +22,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class UserController @Inject()(ws: WSClient) extends AuthController {
+class UserController @Inject()(ws: WSClient)(val messagesApi: MessagesApi) extends AuthController with I18nSupport{
   val addUserForm : Form[TemporaryUser]= Form(
     mapping(
       "email" -> nonEmptyText,
