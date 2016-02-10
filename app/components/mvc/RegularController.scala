@@ -6,6 +6,7 @@ import models.authentication.{LoginValues, User}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -24,9 +25,10 @@ trait RegularController extends Controller {
     )
 
     def invokeBlock[A](request: Request[A], block: RegularRequest[A] => Future[Result]) = {
-        block(new RegularRequest(SessionManager.fetch(request), request))
-
-
+      val futureOptionUser: Future[Option[User]] = SessionManager.fetch(request)
+      futureOptionUser.flatMap { optionUser =>
+        block(new RegularRequest(optionUser, request))
+      }
     }
   }
 

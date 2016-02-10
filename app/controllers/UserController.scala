@@ -16,6 +16,9 @@ import play.api.data.Forms._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import repositories.authentication.UserRepository
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class UserController @Inject()(ws: WSClient) extends AuthController {
@@ -63,7 +66,7 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
     Ok(views.html.myaccount.designEditPassword(editPasswordForm,request.user))
   }
 
-  def saveEditionUser() = AuthenticatedAction(){ implicit request =>
+  def saveEditionUser() = AuthenticatedAction().async{ implicit request =>
     val cuser =models.authentication.EditUser(request.user.email,request.user.firstName,request.user.lastName,request.user.password)
 
     editUserForm.bindFromRequest.fold(
@@ -71,50 +74,49 @@ class UserController @Inject()(ws: WSClient) extends AuthController {
 
         // Request payload is invalid.envisageable
 
-        BadRequest(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser),request.user))
+        Future.successful(BadRequest(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser),request.user)))
 
       },
       success => {
 
         val filledForm = editUserForm.fill(success.copy(password=""))
 
-        UserRepository.getByEmail(request.user.email) match {
+        UserRepository.findByEmail(request.user.email).flatMap{
           case Some(user) =>
 
             if (PasswordAuthentication.authenticate( success.password,user.password)) {
               val newUser = EditUser(user.email,success.firstName,success.lastName,PasswordAuthentication.passwordHash(success.password))
 
               repositories.authentication.UserRepository.editUser(newUser)
-              val upDatedUser = UserRepository.findByEmail(newUser.email)
-              Ok(views.html.myaccount.designProfile(upDatedUser.get))
-
+              val upDatedUser: Future[Option[User]] = UserRepository.findByEmail(newUser.email)
+              upDatedUser.map {
+                case Some(user) => Ok(views.html.myaccount.designProfile(user))
+                case None => BadRequest(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser), request.user))
+              }
             }
             else {
-
-
-              Unauthorized(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser.copy(password="")),request.user))
-
+              Future.successful(Unauthorized(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser.copy(password="")),request.user)))
         }
 
           case None =>
-            Unauthorized(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser.copy(password="")),request.user))
+            Future.successful(Unauthorized(views.html.myaccount.designEdit(editUserForm.withGlobalError("error.invalidPassword").fill(cuser.copy(password="")),request.user)))
         }
       }
     )
 
   }
-  def saveEditionPassword() = AuthenticatedAction(){ implicit request =>
+  def saveEditionPassword() = AuthenticatedAction().async{ implicit request =>
     editPasswordForm.bindFromRequest.fold(
       error => {
 
         // Request payload is invalid.envisageable
-        BadRequest(views.html.myaccount.designEditPassword(editPasswordForm.withGlobalError("error.invalidPassword"),request.user))
+        Future.successful(BadRequest(views.html.myaccount.designEditPassword(editPasswordForm.withGlobalError("error.invalidPassword"),request.user)))
       },
       success => {
 
         val filledForm = editPasswordForm.fill(success)
 
-        UserRepository.findByEmail(request.user.email) match {
+        UserRepository.findByEmail(request.user.email).map{
           case Some(user) =>
             if (PasswordAuthentication.authenticate( success.oldPassword,user.password)) {
               val newUser = User(user.email,user.firstName,user.lastName,PasswordAuthentication.passwordHash(success.newPassword),user.dateRegistration)

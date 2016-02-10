@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 //
 //case class User(
@@ -80,14 +81,6 @@ object UserRepository extends UserRepository {
     else Some((listBSON.map(doc => UserRepository.userReader.read(doc))))
   }
 
-  def getByEmail(email: String): Option[User] = {
-    val query = BSONDocument("email" -> email)
-    //value gives option of try from future list, 2 gets fot option and try then head
-    val listBSON = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
-    //collect returns a future type that needs to be unwrapped
-    if (listBSON.isEmpty) return None
-    else Some(UserRepository.userReader.read(listBSON.head))
-  }
 
   def create(user: TemporaryUser): Unit = {
 //    val email = user.email
@@ -128,13 +121,16 @@ object UserRepository extends UserRepository {
 //      }
   }
 
-  def findByEmail (email: String): Option[User] = {
+  def findByEmail (email: String): Future[Option[User]] = {
     val query = BSONDocument("email" -> email)
-    val listUser = collection.find(query).cursor[BSONDocument]().collect[List]().value.get.get
-    listUser match {
-      case  x::r => Some(userReader.read(x))
-      case _ => None
-    }
+    val listUser = collection.find(query).cursor[BSONDocument]().collect[List]()
+    listUser.map( list =>
+      list match {
+        case x :: r => Some(userReader.read(x))
+        case _ => None
+      }
+    )
+
   }
 
 

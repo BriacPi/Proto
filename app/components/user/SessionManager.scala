@@ -6,7 +6,9 @@ package components.user
 
 import models.authentication.User
 import repositories.authentication.UserRepository
+import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.Future
 import scala.util.Try
 
 import play.api.mvc.Result
@@ -25,10 +27,13 @@ trait SessionManager {
     result.withNewSession
   }
 
-  def fetch(request: RequestHeader): Option[User] = {
+  def fetch(request: RequestHeader): Future[Option[User]] = {
     // TODO Use Hystrix
 
-    get(request).flatMap(UserRepository.findByEmail)
+    get(request) match {
+      case Some(email) => UserRepository.findByEmail(email)
+      case None => Future{None}
+    }
   }
 
   private[this] def get(request: RequestHeader): Option[String] = {

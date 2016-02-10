@@ -6,6 +6,7 @@ import models.authentication.{LoginValues, User}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -36,12 +37,12 @@ trait AuthController extends Controller {
     )
 
     def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]) = {
-      SessionManager.fetch(request) match {
+      val futureOptionUser: Future[Option[User]] = SessionManager.fetch(request)
+      futureOptionUser.flatMap {
         case Some(user) if authorization.accept(user) => block(new AuthenticatedRequest(user, request))
         case _ =>
           Future.successful(Redirect(controllers.routes.AuthenticationController.welcome()))
       }
     }
   }
-
 }
