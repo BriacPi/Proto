@@ -31,7 +31,7 @@ trait SessionManager {
     // TODO Use Hystrix
 
     get(request) match {
-      case Some(email) => UserRepository.findByEmail(email)
+      case Some(email) => UserRepository.getByEmail(email)
       case None => Future{None}
     }
   }
