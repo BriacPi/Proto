@@ -8,11 +8,11 @@ import org.joda.time.DateTime
   */
 case class Comment (
 
-                     author: User,
                      content: String,
                      creationDate: DateTime,
-                     nbLikes: Int,
-                     listUsersLikes: List[User]
-
+                     nbLikes: Int
+  //DB:
+                   //"author_id" = "_id" in "users"
+                   //"article_id" = "_id" in "comments"
                    )
 

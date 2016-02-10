@@ -16,5 +16,6 @@ case class Article(
                     lastUpdate: DateTime,
                     nbLikes: Int,
                     nbComments: Int
-
+                    //in DB:
+                    //author_id = field "_id" in collection "users"
                   )
