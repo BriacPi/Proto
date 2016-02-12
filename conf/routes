@@ -1,23 +1,32 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET         /assets/*file           controllers.Assets.versioned(path="/public", file)
+
+
+
+GET         /assets/*file               controllers.Assets.versioned(path="/public", file)
 
 #Main
-GET         /                       controllers.Application.welcome()
+GET         /                           controllers.Application.welcome()
 
 # Authentication
-GET         /authentication         controllers.AuthenticationController.welcome()
-GET         /logout                 controllers.AuthenticationController.logout()
+GET         /authentication             controllers.AuthenticationController.welcome()
+GET         /logout                     controllers.AuthenticationController.logout()
 
 # User Management
-GET         /useredition            controllers.UserController.editUser()
-GET         /temp controllers.UserController.temp()
-POST        /adduser                controllers.UserController.addUser()
-GET         /passwordedition        controllers.UserController.editPassword()
-POST        /login                  controllers.AuthenticationController.login()
-POST        /edituser               controllers.UserController.saveEditionUser()
-POST        /editpassword           controllers.UserController.saveEditionPassword()
+GET         /useredition                controllers.UserController.editUser()
+GET         /temp                       controllers.UserController.temp()
+POST        /adduser                    controllers.UserController.addUser()
+GET         /passwordedition            controllers.UserController.editPassword()
+POST        /login                      controllers.AuthenticationController.login()
+POST        /edituser                   controllers.UserController.saveEditionUser()
+POST        /editpassword               controllers.UserController.saveEditionPassword()
 
 
-GET         /myprofile              controllers.UserController.myProfile()
+GET         /myprofile                  controllers.UserController.myProfile()
+
+#Content Management
+GET         /getAllArticles             controllers.ContentController.getAllArticles()
+GET         /getArticlesByAuthor        controllers.ContentController.getArticlesByAuthor()
+GET         /likeArticle                controllers.ContentController.articleToLike()
+POST        /likeArticle/:title         controllers.ContentController.likes(title)

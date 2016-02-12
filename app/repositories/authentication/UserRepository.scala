@@ -1,8 +1,8 @@
 package repositories.authentication
 
-
+import repositories.content._
 import scala.util.{Failure, Success}
-import models.authentication.{EditUser, TemporaryUser, Article, User}
+import models.authentication.{EditUser, TemporaryUser, User}
 import mongo.MongoDBProxy
 import org.joda.time.DateTime
 import reactivemongo.api.collections.bson.BSONCollection
@@ -53,7 +53,7 @@ object UserRepository extends UserRepository {
     }
 
     def write(user: User): BSONDocument = {
-//      def doc: BSONDocument = BSONDocument()
+      //      def doc: BSONDocument = BSONDocument()
       //      println(user)
       //      doc.++("email" -> user.email)
       //      doc.++("firstName" -> user.firstName)
@@ -77,12 +77,12 @@ object UserRepository extends UserRepository {
     val tempUserDoc: BSONDocument = userWriter.write(user)
 
     // add or ++ methods create a new copy, deos not append.
-    val newUserDoc = tempUserDoc.add("dateRegistration" ->  BSONDateTime(DateTime.now().getMillis))
+    val newUserDoc = tempUserDoc.add("dateRegistration" -> BSONDateTime(DateTime.now().getMillis))
     val future: Future[WriteResult] = collectionUser.insert(newUserDoc)
     future.onComplete {
       case Failure(e) => throw e
       case Success(writeResult) =>
-        println(s"successfully inserted document with result: $writeResult")
+        println(s"successfully created user with result: $writeResult")
     }
   }
 
@@ -94,7 +94,7 @@ object UserRepository extends UserRepository {
     future.onComplete {
       case Failure(e) => throw e
       case Success(writeResult) =>
-        println(s"successfully inserted document with result: $writeResult")
+        println(s"successfully edited user with result: $writeResult")
     }
   }
 
@@ -147,5 +147,31 @@ object UserRepository extends UserRepository {
 
   }
 
+  def getId(user: User): Future[Option[BSONDocument]] = {
+    val query = BSONDocument(
+      "email" -> user.email
+    )
+    val futureOption: Future[Option[BSONDocument]] = collectionUser.find(query).cursor[BSONDocument]().headOption
 
+    val futureId: Future[Option[BSONDocument]] = futureOption.map {
+      case None => None
+      case Some(doc) => Some(BSONDocument("user_id" -> doc.getAs[BSONObjectID]("_id")))
+    }
+
+    return futureId
+  }
+
+  def getId(email: String): Future[Option[BSONDocument]] = {
+    val query = BSONDocument(
+      "email" -> email
+    )
+    val futureOption: Future[Option[BSONDocument]] = collectionUser.find(query).cursor[BSONDocument]().headOption
+
+    val futureId: Future[Option[BSONDocument]] = futureOption.map {
+      case None => None
+      case Some(doc) => Some(BSONDocument("user_id" -> doc.getAs[BSONObjectID]("_id")))
+    }
+
+    return futureId
+  }
 }

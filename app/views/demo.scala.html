@@ -1,15 +1,36 @@
-@import models.authentication.User
+@import helper._
+@import play.api.Play.current
+@import play.api.i18n.Messages.Implicits._
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>demo</title>
-    </head>
-    <body>
-        Coucou Su
-        &nbsp
-        <br>
-        <br/>
-    </body>
-</html>
+
+@(userForm:Form[String])(implicit lang:Lang)
+
+@helper.form(action = routes.ContentController.likes("test"), args = 'class -> "userForm"){
+    <div class="centerFlex vertical-center" style="text-align: center" >
+        <div class="page-header">
+
+            <h1>@Messages("user.add")</h1>
+        </div>
+
+
+        @* views.html.admin.components.globalError(userForm) *@
+        <div class="content" style="margin-left:1em;">
+            @if(userForm.hasGlobalErrors) {
+                <div class="user__global-error-message vertical-center">
+                @for(err <- userForm.globalErrors.flatMap(_.messages)) {
+                    <div class="error vertical-center errorRed">@Messages(err)</div>
+                }
+                </div>
+            }
+            <div>
+            @helper.inputText(userForm("title"), '_label -> Messages("the title of the article you like"))
+            </div>
+
+            <div class="submit">
+                <input type="submit" name="submit" value=@Messages("like!!!")>
+            </div>
+        </div>
+        }
+
+</div>
+

@@ -1,8 +1,7 @@
-
-
-package models.authentication
+package models.contents
 
 import org.joda.time.DateTime
+
 /**
   * Created by corpus on 01/02/2016.
   */
@@ -15,4 +14,3 @@ case class Comment (
                    //"author_id" = "_id" in "users"
                    //"article_id" = "_id" in "comments"
                    )
-
